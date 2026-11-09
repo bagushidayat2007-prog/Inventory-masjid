@@ -19,7 +19,9 @@ return new class extends Migration
 
             $table->foreign('id_kategori')->references('id_kategori')->on('kategori')->nullOnDelete();
             $table->foreign('id_supplier')->references('id_supplier')->on('supplier')->nullOnDelete();
+            
         });
+
     }
 
     public function down(): void

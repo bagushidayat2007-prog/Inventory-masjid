@@ -6,6 +6,7 @@ use App\Models\Keuangan;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\PengajuanPengeluaran;
 
 class KeuanganController extends Controller
 {
@@ -55,13 +56,43 @@ class KeuanganController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateData($request);
+
         $data['id_pengguna'] = $request->user()->id_pengguna;
 
+        // Jika bendahara menginput pengeluaran
+        if (
+            $request->user()->role === 'bendahara' &&
+            $data['jenis'] === 'pengeluaran'
+        ) {
+            PengajuanPengeluaran::create([
+                'id_pengguna' => $data['id_pengguna'],
+                'tanggal' => $data['tanggal'],
+                'jumlah' => $data['jumlah'],
+                'tujuan' => $data['tujuan'] ?? null,
+                'keterangan' => $data['keterangan'] ?? null,
+                'status' => 'menunggu',
+            ]);
+
+            AuditLogger::log(
+                'Mengajukan pengeluaran sebesar Rp ' .
+                number_format($data['jumlah'], 0, ',', '.')
+            );
+
+            return redirect()->route('keuangan.index')
+                ->with('success', 'Pengajuan pengeluaran berhasil dikirim dan menunggu persetujuan admin.');
+        }
+
+        // Transaksi lainnya tetap disimpan langsung
         Keuangan::create($data);
 
-        AuditLogger::log('Menambahkan '.$data['jenis'].' keuangan sebesar Rp '.number_format($data['jumlah'], 0, ',', '.'));
+        AuditLogger::log(
+            'Menambahkan ' . $data['jenis'] .
+            ' keuangan sebesar Rp ' .
+            number_format($data['jumlah'], 0, ',', '.')
+        );
 
-        return redirect()->route('keuangan.index')->with('success', 'Transaksi keuangan berhasil ditambahkan.');
+        return redirect()->route('keuangan.index')
+            ->with('success', 'Transaksi keuangan berhasil ditambahkan.');
     }
 
     public function edit(Keuangan $keuangan)

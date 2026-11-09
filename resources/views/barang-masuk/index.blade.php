@@ -6,11 +6,6 @@
     <div class="card">
         <div class="card-header">
             <h2>Transaksi Barang Masuk</h2>
-            @if (auth()->user()->role !== 'admin')
-                <a href="{{ route('barang-masuk.create') }}" class="btn btn-primary">
-                    + Tambah Barang Masuk
-                </a>
-            @endif
         </div>
 
         <div class="card-body" style="padding-bottom:0;">

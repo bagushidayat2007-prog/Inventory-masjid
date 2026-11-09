@@ -13,6 +13,7 @@ use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApprovalController;
 
 Route::get('/', fn () => redirect()->route('dashboard'));
 
@@ -26,6 +27,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/data', [DashboardController::class, 'data'])->name('dashboard.data');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -57,5 +59,22 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('pengguna', PenggunaController::class)->except('show');
         Route::get('/audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+        // Halaman persetujuan admin
+        Route::get('/approval', [ApprovalController::class, 'index'])
+            ->name('approval.index');
+
+        // Persetujuan barang
+        Route::post('/approval/barang/{id}/setujui', [ApprovalController::class, 'setujuiBarang'])
+            ->name('approval.barang.setujui');
+
+        Route::post('/approval/barang/{id}/tolak', [ApprovalController::class, 'tolakBarang'])
+            ->name('approval.barang.tolak');
+
+        // Persetujuan pengeluaran
+        Route::post('/approval/pengeluaran/{id}/setujui', [ApprovalController::class, 'setujuiPengeluaran'])
+            ->name('approval.pengeluaran.setujui');
+
+        Route::post('/approval/pengeluaran/{id}/tolak', [ApprovalController::class, 'tolakPengeluaran'])
+            ->name('approval.pengeluaran.tolak');
     });
 });

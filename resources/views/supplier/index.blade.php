@@ -17,7 +17,7 @@
                     @endif
                 </form>
 
-                @if (auth()->user()->role !== 'admin')
+                @if (auth()->user()->role !== 'petugas_inventory')
                     <a href="{{ route('supplier.create') }}" class="btn btn-primary">
                         + Tambah Supplier
                     </a>
@@ -50,7 +50,7 @@
                                 <div class="btn-group">
                                     <a href="{{ route('supplier.show', $item) }}" class="btn btn-secondary btn-sm">Detail</a>
                                     
-                                    @if (auth()->user()->role !== 'admin')
+                                    @if (auth()->user()->role !== 'petugas_inventory')
                                         <a href="{{ route('supplier.edit', $item) }}" class="btn btn-secondary btn-sm">
                                             Edit
                                         </a>
@@ -58,7 +58,7 @@
                                     <form action="{{ route('supplier.destroy', $item) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        @if (auth()->user()->role !== 'admin')
+                                        @if (auth()->user()->role !== 'petugas_inventory')
                                             <form action="{{ route('supplier.destroy', $item) }}"
                                                 method="POST"
                                                 style="display: inline;"

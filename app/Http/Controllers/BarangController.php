@@ -8,11 +8,12 @@ use App\Models\Supplier;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-
+use App\Models\PengajuanBarang;
 class BarangController extends Controller
 {
     public function index(Request $request)
     {
+        
         $query = Barang::with(['kategori', 'supplier']);
 
         if ($search = $request->input('search')) {
@@ -50,13 +51,32 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
+        // Validasi menggunakan validasi barang yang sudah ada
         $data = $this->validateData($request);
 
+        // Jika yang menambahkan adalah petugas inventory
+        if ($request->user()->role === 'petugas_inventory') {
+
+            PengajuanBarang::create([
+                'id_pengguna' => $request->user()->id_pengguna,
+                'id_kategori' => $data['id_kategori'],
+                'id_supplier' => $data['id_supplier']?? null,
+                'nama_barang' => $data['nama_barang'],
+                'satuan' => $data['satuan'],
+                'stok' => $data['stok'],
+                'kondisi' => $data['kondisi'],
+                'status' => 'menunggu',
+            ]);
+
+            return redirect()->route('barang.index')
+                ->with('success', 'Pengajuan barang berhasil dikirim dan menunggu persetujuan admin.');
+        }
+
+        // Jika yang menambahkan adalah admin
         Barang::create($data);
 
-        AuditLogger::log('Menambahkan data barang: '.$data['nama_barang']);
-
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan.');
+        return redirect()->route('barang.index')
+            ->with('success', 'Barang berhasil ditambahkan.');
     }
 
     public function show(Barang $barang)
